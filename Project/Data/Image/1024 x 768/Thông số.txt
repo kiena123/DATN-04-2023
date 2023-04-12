@@ -1,0 +1,12 @@
+- Chiều dài ảnh : 1024 pixels
+- Chiều rộng ảnh : 768 pixels
+- Horizontal resolution : 96 dpi ( pixel/inch )
+- Vertical resolution : 96 dpi
+- Bit depth : 24
+- Cách mặt đất : 600ft = 182.88m 
+- Tỉ lệ : 
+	+ Chiều dài điểm ảnh : 1024 pixels = 720 m 
+	+ Chiều rộng điểm ảnh : 768 pixels = 520 m 
+
+**********		Chú ý :
+- 1 inch = 2,54 cm
