@@ -5,84 +5,74 @@ import numpy as np
 ''' Do Do Thuat Toan DB '''
 ###
 def DB(data, center, numClust, U):
-    def d( X1, l, m):
-        return np.linalg.norm(X1[l] - X1[m])
+    N, r = data.shape
+    maxU = max(np.unique(U))
 
-    def d1( X, X1, U, l):
-        sum1 = 0
-        for Xi in U[:, l]:
-            sum1 += np.linalg.norm(Xi - X1[l])
-            
-        return sum1/N[l]
-
-    def D(X, X1, U, C, l, m):
-        N = len(X)
-        __Tu = d1( X, X1, C, l) + d1( X, X1, C, m)
-        __Mau = d( X1, l, m)
-        return __Tu / __Mau
-
-    sum1 = 0
+    S = np.zeros(shape = numClust)
+    
     for j in range(numClust):
-        listD = list()
-        for l in range(j):
-            for m in range(j):
-                if ( l != m):
-                    listD.append(D(data, center, numClust, U, l, m))
-
-        sum1 += max(listD) if len(listD) > 0 else 0
-
-    return sum1/numClust
+        index = np.where(U[:, j] == maxU)[0]
+        for i in index:
+            S[j] += pow(np.linalg.norm(data[i] - center[j]), 2)
+        S[j] = pow(S[j]/N, 1/2)
+        
+    DB_value = 0
+    
+    for l in range(numClust):
+        maxSM = 0;
+        for m in range(numClust):
+            if ( l != m):
+                temp = (S[l] + S[m])/np.linalg.norm(center[l] - center[m])
+                maxSM = max(maxSM, temp)
+        DB_value += maxSM
+        
+    return DB_value/numClust
 
 ###
 ''' Do Do Thuat Toan IFV '''
 ###
 def IFV( X, V, C, U):
-    U = np.array(U)
-    eps = 0.01
-    def SDmax(V, j):
-        listSD = list()
-        for k in range(j):
-            for i in range(j):
-               if(i != k):
-                  listSD.append(pow(np.linalg.norm(V[k] - V[i]), 2))
-                  
-        return max(listSD) if len(listSD) > 0 else 0
+    N, r = X.shape
+    sigmaD = 0;
+    sum1 = 0;
+    eps = 0.0001
     
-    def Sigma1D(X, V, C, N):
-        sum1 = 0;
-        for j in range(C):
-            sum2 = 0
-            for k in range(N):
-                sum2 += pow(np.linalg.norm(X[k] - V[j]), 2)
-            sum1 += sum2/N
-        return sum1/C
-
-    N = len(X)
-    sum1 = 0
     for j in range(C):
         sum2 = 0
+        sum3 = 0
         for k in range(N):
-            sum3 = 0
-            for k in range(N):
-                if U[k, j] == float(0):
-                    U[k, j] = eps
-                    
-                if U[k, j] == float(1):
-                    U[k, j] = 1 - eps
-                sum3 += math.log(U[k, j], 2)
-            sum2 += pow(U[k, j], 2) * pow(math.log(C, 2) - sum3/N, 2)
+            if U[k, j] == float(0):
+                U[k, j] = eps
+                
+            if U[k, j] == float(1):
+                U[k, j] = 1 - eps
 
-        __TuSo = SDmax(V, j)
-        __MauSo = Sigma1D(X, V, C, len(X))
-        sum1 += sum2/N*__TuSo/__MauSo
+            # sum2 += math.log(U[k, j])/math.log(2)
+            sum2 += math.log(U[k, j], 2)
+            sum3 += pow( U[k, j], 2)
+            sigmaD += pow( np.linalg.norm(X[k] - V[j]), 2)
 
-    return sum1/C
+        sum2 = pow( math.log(C, 2) - sum2/N,2)
+        sum3 = sum3 / N
+
+        sum1 += sum2 * sum3
+
+    sigmaD = sigmaD/(N * C)
+
+    calcSDmax = 0;
+    for i in range(C - 1):
+        for j in range(i+1, C):
+            calcSDmax = max(calcSDmax, pow(np.linalg.norm(V[i] - V[j]), 2))
+
+    return (sum1 * calcSDmax) / ( sigmaD * C)
 
 ###
 ''' Do Do Thuat Toan PDM '''
 ###
 def PDM( X, X1, k, U ):
-    N = len(X)
+    N, r = X.shape
+    maxU = max(np.unique(U))
+    
     def E1():
         sum1 = 0
         for i in range(N):
@@ -92,21 +82,22 @@ def PDM( X, X1, k, U ):
     def Ek():
         sum1 = 0
         for l in range(k):
-            for Xi in U[:, l]:
-                sum1 += np.linalg.norm(Xi - X1[l])
+            index = np.where(U[:, l] == maxU)[0]
+            clustData = X[index, :]
+            sum1 += np.linalg.norm(clustData - X1[l])
         return sum1
 
     def Dk():
-        list1 = list()
-        for l in range(k):
-            for m in range(k):
-                list1.append(np.linalg.norm(X1[l] - X1[m]))
-        return max(list1)
+        __Dk = 0
+        for l in range(k - 1):
+            for m in range( l+1, k):
+                __Dk = max(__Dk, np.linalg.norm(X1[l] - X1[m]))
+        return __Dk
 
     __E1 = E1()
     __Ek = Ek()
     __Dk = Dk()
-    return pow( __E1*__Dk/__Ek/k, 2)
+    return pow((__E1*__Dk)/(__Ek*k), 2)
 
 ###
 ''' Do Do Thuat Toan SSWC '''
@@ -116,7 +107,12 @@ def SSWC(X, X1, C, U):
     SSWC_value = 0
     for j in range(C):
         index = np.where(U[:, j] == maxU)[0]
+
+        if len(index) == 1:
+            continue
+        
         clustData = X[index, :]
+        
         for i in index:
             __Aji = sum(np.linalg.norm(val - X[i, :]) for val in clustData)/len(index)
             __Bji = 10^6
@@ -125,8 +121,9 @@ def SSWC(X, X1, C, U):
                 if k != j :
                     indexK = np.where(U[:, k] == maxU)[0]
                     clustDataK = X[indexK, :]
-                    __Dki = sum(np.linalg.norm(val - X[i, :]) for val in clustDataK)/len(indexK)
-                    __Bji = min( __Bji, __Dki)
+                    if len(indexK) > 0:
+                        __Dki = sum(np.linalg.norm(val - X[i, :]) for val in clustDataK)/len(indexK)
+                        __Bji = min( __Bji, __Dki)
 
             SSWC_value += (__Bji - __Aji) / max(__Bji ,__Aji)
         
