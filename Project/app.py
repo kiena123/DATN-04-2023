@@ -102,7 +102,7 @@ def HandleBtnOk():
     print(U)
     print(V)
     
-    pd.DataFrame(U1).to_csv(f"./Result/U1.csv", index = False, header= False, mode="w")
+    pd.DataFrame(U1.T).to_csv(f"./Result/U1.csv", index = False, header= False, mode="w")
     pd.DataFrame(U).to_csv(f"./Result/U.csv", index = False, header= False, mode="w")
     
     shapeNewX = imageInput.shape

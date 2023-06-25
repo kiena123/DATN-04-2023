@@ -65,27 +65,26 @@ end
 %Vong lap
     dem = 0;
     while (1>0)
-
-     for j = 1:C
-       for k = 1:N
-          tong1 = (X(k,:)-V(j,:))*A*(X(k,:)-V(j,:))';
-          tong1=exp((-lamda)*tong1);
-          %Tinh tong2
-          tong2 = 0;
-          for i = 1:C
-              tong2=tong2+U1(i,k);
-          end    
-          tong2=1-tong2;
-          %Tinh tong3
-          tong3=0;
-          for i=1:C
-              tong4=(X(k,:)-V(i,:))*A*(X(k,:)-V(i,:))';
-              tong3=tong3+exp((-lamda)*tong4);
-          end
-          
-          U(j,k) = U1(j,k)+(tong1*tong2)/tong3;
-       end    
-     end
+        for j = 1:C
+            for k = 1:N
+                tong1 = (X(k,:)-V(j,:))*A*(X(k,:)-V(j,:))';
+                tong1=exp((-lamda)*tong1);
+                %Tinh tong2
+                tong2 = 0;
+                for i = 1:C
+                    tong2=tong2+U1(i,k);
+                end    
+                tong2=1-tong2;
+                %Tinh tong3
+                tong3=0;
+                for i=1:C
+                    tong4=(X(k,:)-V(i,:))*A*(X(k,:)-V(i,:))';
+                    tong3=tong3+exp((-lamda)*tong4);
+                end
+                
+                U(j,k) = U1(j,k)+(tong1*tong2)/tong3;
+            end    
+        end
          %chuan hoa U
          
         %Tinh V(t+1) tu U ra W

@@ -9,7 +9,7 @@ e = math.exp(1)
 # U1 : Ungang
 
 
-def eSFCM(X, U1, C, m, eps = 0.001, maxStep = 1000, lamda = 0.0000001):
+def eSFCM(X, U1, C, m, eps = 0.001, maxStep = 1000, lamda = 1):
     def initV1( X, C):
         print("lamda ", lamda)
         N, r = X.shape
@@ -49,11 +49,11 @@ def eSFCM(X, U1, C, m, eps = 0.001, maxStep = 1000, lamda = 0.0000001):
         for k in range(len(X)):
             for j in range(len(V)):
                 # print(-lamda * dA(__A, X[k], V[j]))
-                __Tu = pow( e, -lamda * dA(__A, X[k], V[j]))
+                __Tu = pow( e, -1 * lamda * dA(__A, X[k], V[j]))
                 __Mau = 0
                 __sumU1 = 0
                 for i in range(len(V)):
-                    __Mau += pow( e, -lamda * dA(__A, X[k], V[i]))
+                    __Mau += pow( e, -1 * lamda * dA(__A, X[k], V[i]))
                     __sumU1 += U1[k][i]
 
                 if __Mau != 0 :
@@ -111,7 +111,8 @@ def eSFCM(X, U1, C, m, eps = 0.001, maxStep = 1000, lamda = 0.0000001):
         print(np.linalg.norm(U - __U))
         if(np.linalg.norm(U - __U) <= eps):
         '''
-        print()
+        print(V)
+        print(__V)
         if(np.linalg.norm(V - __V) <= eps):
             break;
         V = __V

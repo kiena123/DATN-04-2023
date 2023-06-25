@@ -2,6 +2,17 @@ import math
 import numpy as np
 
 ###
+''' Cac ham viet them '''
+###
+def calcSumDistDataPoint2X(data, X):
+    temp = data - np.tile(X, (data.shape[0], 1))
+    temp = temp**2
+    temp = np.sum(temp, axis=1)
+    temp = np.sqrt(temp)
+    t = np.sum(temp)
+    return t
+
+###
 ''' Do Do Thuat Toan DB '''
 ###
 def DB(data, center, numClust, U):
@@ -36,6 +47,8 @@ def IFV( X, V, C, U):
     sigmaD = 0;
     sum1 = 0;
     eps = 0.0001
+
+    print(max(np.unique(U)))
     
     for j in range(C):
         sum2 = 0
@@ -47,12 +60,11 @@ def IFV( X, V, C, U):
             if U[k, j] == float(1):
                 U[k, j] = 1 - eps
 
-            # sum2 += math.log(U[k, j])/math.log(2)
-            sum2 += math.log(U[k, j], 2)
+            sum2 += math.log(U[k, j])/math.log(2)
             sum3 += pow( U[k, j], 2)
             sigmaD += pow( np.linalg.norm(X[k] - V[j]), 2)
 
-        sum2 = pow( math.log(C, 2) - sum2/N,2)
+        sum2 = pow((math.log(C)/math.log(2)) - (sum2/N),2)
         sum3 = sum3 / N
 
         sum1 += sum2 * sum3
@@ -69,35 +81,29 @@ def IFV( X, V, C, U):
 ###
 ''' Do Do Thuat Toan PDM '''
 ###
-def PDM( X, X1, k, U ):
-    N, r = X.shape
-    maxU = max(np.unique(U))
+def PDM(data, center, numClust, U):
+    N, r = data.shape
     
-    def E1():
-        sum1 = 0
-        for i in range(N):
-            sum1 += np.linalg.norm(X[i] - X1)
-        return sum1
+    E_1 = calcSumDistDataPoint2X(data, np.mean(data, axis=0))
 
-    def Ek():
-        sum1 = 0
-        for l in range(k):
-            index = np.where(U[:, l] == maxU)[0]
-            clustData = X[index, :]
-            sum1 += np.linalg.norm(clustData - X1[l])
-        return sum1
+    maxU = max(np.unique(U))
+    E_k = 0
+    for i in range(numClust):
+        index = np.where(U[:, i] == maxU)[0]
+        clustData = data[index, :]
+        E_k = E_k + calcSumDistDataPoint2X(clustData, center[i, :])
 
-    def Dk():
-        __Dk = 0
-        for l in range(k - 1):
-            for m in range( l+1, k):
-                __Dk = max(__Dk, np.linalg.norm(X1[l] - X1[m]))
-        return __Dk
+    D_k = 0
+    for i in range(numClust-1):
+        for j in range(i+1, numClust):
+            D_k = max(D_k, np.linalg.norm(center[i, :] - center[j, :]))
 
-    __E1 = E1()
-    __Ek = Ek()
-    __Dk = Dk()
-    return pow((__E1*__Dk)/(__Ek*k), 2)
+    if E_k != 0:
+        PBM_value = (E_1 * D_k / (numClust * E_k)) ** 2
+    else:
+        PBM_value = 0
+        
+    return PBM_value
 
 ###
 ''' Do Do Thuat Toan SSWC '''

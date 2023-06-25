@@ -9,7 +9,7 @@ e = math.exp(1)
 # U1 : Ungang
 
 
-def eSFCM(X, U1, C, m, eps = 0.001, maxStep = 1000, lamda = 0.000001):
+def eSFCM(X, U1, C, m, eps = 0.001, maxStep = 1000, lamda = 1):
     def initV1( X, C):
         N, r = X.shape
         print("Lamda : ", lamda)
@@ -104,11 +104,11 @@ def eSFCM(X, U1, C, m, eps = 0.001, maxStep = 1000, lamda = 0.000001):
         '''
         
         if(np.linalg.norm(V - __V) <= eps):
-        
+        if(np.linalg.norm(U - __U) <= eps):
         '''
         print(np.linalg.norm(V - __V))
         print(np.linalg.norm(U - __U))
-        if(np.linalg.norm(U - __U) <= eps):
+        if(np.linalg.norm(V - __V) <= eps):
             break;
         V = __V
         U = __U
@@ -123,7 +123,7 @@ def main():
     Ungang = np.array(pd.read_csv("./Result/U1.csv", header = None), dtype = int)
     C = 2
     m = 2
-    U, V = eSFCM(X, Ungang, C, m, eps = 0.000001)
+    U, V = eSFCM(X, Ungang, C, m, eps = 0.01)
     print(U)
     print(V)
 
